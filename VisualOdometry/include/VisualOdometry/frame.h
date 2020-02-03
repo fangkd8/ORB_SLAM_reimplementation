@@ -2,6 +2,7 @@
 #define FRAME_H
 
 #include "VisualOdometry/common_include.h";
+#include "VisualOdometry/camera.h";
 namespace VisualOdometry
 {
 
