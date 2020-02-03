@@ -1,5 +1,5 @@
-#ifndef FRAME_H
-#define FRAME_H
+#ifndef MAPPOINT_H
+#define MAPPOINT_H
 
 #include "VisualOdometry/common_include.h";
 namespace VisualOdometry
