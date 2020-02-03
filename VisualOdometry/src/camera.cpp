@@ -1,14 +1,14 @@
-#include "VisualOdometry/camera.h"
+#include "VisualOdometry/camera.h";
 
 namespace VisualOdometry
 {
 Eigen::Vector3d Camera::world2camera(const Eigen::Vector3d p_w, 
-                                     sophus::SE3 T_c_w){
+                                     Sophus::SE3 T_c_w){
   return T_c_w * p_w;
 }
 
 Eigen::Vector3d Camera::camera2world(const Eigen::Vector3d p_c, 
-                                     sophus::SE3 T_c_w){
+                                     Sophus::SE3 T_c_w){
   return T_c_w.inverse() * p_c;
 }
 
@@ -30,13 +30,13 @@ Eigen::Vector3d Camera::pixel2camera(const Eigen::Vector2d p_p,
 }
 
 Eigen::Vector2d Camera::world2pixel (const Eigen::Vector3d p_w, 
-                                     sophus::SE3 T_c_w){
+                                     Sophus::SE3 T_c_w){
   Eigen::Vector3d p_c = world2camera(p_w, T_c_w);
   return camera2pixel(p_c);
 }
 
 Eigen::Vector3d Camera::pixel2world (const Eigen::Vector2d p_p, 
-                                     sophus::SE3 T_c_w, double depth = 1)
+                                     Sophus::SE3 T_c_w, double depth = 1)
   Eigen::Vector3d p_c = pixel2camera(p_p, depth);
   return camera2world(p_c, T_c_w);
 }
