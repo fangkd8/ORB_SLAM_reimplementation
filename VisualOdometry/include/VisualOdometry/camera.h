@@ -22,6 +22,9 @@ public:
   Eigen::Vector3d pixel2camera(const Eigen::Vector2d p_p, double depth = 1);
   Eigen::Vector2d world2pixel (const Eigen::Vector3d p_w, Sophus::SE3 T_c_w);
   Eigen::Vector3d pixel2world (const Eigen::Vector2d p_p, Sophus::SE3 T_c_w, double depth = 1);
+
+  // For further use of Intrinsic matrix.
+  cv::Mat getIntrinsic();
 };
 
 }

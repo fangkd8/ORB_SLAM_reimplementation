@@ -13,6 +13,7 @@
 
 // OpenCV
 #include <opencv/core/core.hpp>
+#include <opencv/features2d/features2d.hpp>
 
 // Sophus
 #include <sophus/se3.h>
