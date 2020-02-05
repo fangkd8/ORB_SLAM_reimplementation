@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "VisualOdometry/common_include.h";
+#include "VisualOdometry/common_include.h"
 namespace VisualOdometry
 {
 

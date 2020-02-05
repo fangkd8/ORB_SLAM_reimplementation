@@ -1,8 +1,8 @@
 #ifndef FRAME_H
 #define FRAME_H
 
-#include "VisualOdometry/common_include.h";
-#include "VisualOdometry/camera.h";
+#include "VisualOdometry/common_include.h"
+#include "VisualOdometry/camera.h"
 namespace VisualOdometry
 {
 
@@ -13,14 +13,14 @@ public:
   unsigned long id_; // Frame id.
   double timestamp_; // timestamp
   Sophus::SE3 T_c_w_; // Transformation from world to camera.
-  camera::Ptr camera_;
+  Camera::Ptr camera_;
   cv::Mat color_, depth_; // RGBD data.
 
 public:
   Frame();
   
-  Frame(long id, double timestamp=0, Sophus::SE3 T_c_w=Sophus::SE3(), Camera::Ptr cam=nullptr, 
-        cv::Mat color, cv::Mat depth);
+  Frame(long id, double timestamp=0, Sophus::SE3 T_c_w=Sophus::SE3(), 
+        Camera::Ptr cam=nullptr, cv::Mat color = cv::Mat(), cv::Mat depth = cv::Mat());
 
   ~Frame();
 

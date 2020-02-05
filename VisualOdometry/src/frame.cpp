@@ -4,23 +4,23 @@ namespace VisualOdometry
 
 Frame::Frame(): id_(-1), timestamp_(-1), camera_(nullptr) { };
 
-Frame::Frame(long id, double timestamp=0, Sophus::SE3 T_c_w=Sophus::SE3(), 
-             Camera::Ptr cam=nullptr, cv::Mat color, cv::Mat depth): 
+Frame::Frame(long id, double timestamp, Sophus::SE3 T_c_w, 
+             Camera::Ptr cam, cv::Mat color, cv::Mat depth): 
   id_(id), timestamp_(timestamp), T_c_w_(T_c_w), camera_(cam), color_(color), 
   depth_(depth) { };
 
 Frame::~Frame() {};
 
 // At present, not clear of how this function works,
-static Frame::Ptr Frame::createFrame(){
+Frame::Ptr Frame::createFrame(){
   static long factory_id = 0;
   return Frame::Ptr(new Frame(factory_id++));
 }
 
 double Frame::findDepth(const cv::KeyPoint& kp){
-  int x = cv::cvRound(kp.pt.x);
-  int y = cv::cvRound(kp.pt.y);
-  ushort d = depth_.at<ushort>(y)[x];
+  int x = round(kp.pt.x);
+  int y = round(kp.pt.y);
+  ushort d = depth_.ptr<ushort>(y)[x];
   
   if (d != 0)
     return double(d / camera_->depth_scale_);
@@ -28,8 +28,8 @@ double Frame::findDepth(const cv::KeyPoint& kp){
   int dx[4] = {-1,  0, 1, 0};
   int dy[4] = { 0, -1, 0, 1};
   for (int i = 0; i < 4; i++){
-    if (depth_.at<ushort>(y + dy[i])[x + dx[i]] != 0)
-      return double(depth_.at<ushort>(y + dy[i])[x + dx[i]]
+    if (depth_.ptr<ushort>(y + dy[i])[x + dx[i]] != 0)
+      return double(depth_.ptr<ushort>(y + dy[i])[x + dx[i]]
                      / camera_->depth_scale_);
   }
   // still no value;

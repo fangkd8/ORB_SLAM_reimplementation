@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "VisualOdometry/common_include.h";
+#include "VisualOdometry/common_include.h"
 
 namespace VisualOdometry
 {

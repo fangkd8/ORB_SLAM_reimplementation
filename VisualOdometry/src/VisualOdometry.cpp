@@ -1,4 +1,4 @@
-#include "VisualOdometry/VisualOdometry.h";
+#include "VisualOdometry/VisualOdometry.h"
 
 namespace VisualOdometry
 {
@@ -36,7 +36,7 @@ bool VisualOdometry::addFrame(Frame::Ptr new_frame){
     }
 
     case OK:{
-      cur_frame_ = OK;
+      cur_frame_ = new_frame;
       // detect keypoints, compute descriptors, find matches.
       extractKeypoints();
       computeDescriptor();
@@ -66,7 +66,7 @@ bool VisualOdometry::addFrame(Frame::Ptr new_frame){
       break;
     }
   }
-  return true
+  return true;
 }
 
 void VisualOdometry::extractKeypoints(){
@@ -93,9 +93,9 @@ void VisualOdometry::findFeatureMatches(){
   }
 
   matches.clear();
-  for (int i = 0; i < des1.rows; i++){
+  for (int i = 0; i < des_ref_.rows; i++){
     if (raw_match[i].distance < std::max(30.0, 2*min_dist))
-      matches.push_back(match[i]);
+      matches.push_back(raw_match[i]);
   }
 }
 
@@ -103,17 +103,17 @@ void VisualOdometry::poseEstimationPnP(){
   std::vector<cv::Point3f> pts3d;
   std::vector<cv::Point2f> pts2d;
   for (auto m : matches){
-    pts3d.push_back(ref_points_3d_[m.trainIdx].pt);
+    pts3d.push_back(ref_points_3d_[m.trainIdx]);
     pts2d.push_back(kpts_[m.queryIdx].pt);
   }
-  Mat K = ref_frame_->camera_->getIntrinsic();
-  Mat rvec, tvec, inliers;
-  cv::solvePnPRansac( pts3d, pts2d, K, Mat(), rvec, tvec, false, 100, 4.0, 0.99, inliers );
+  cv::Mat K = ref_frame_->camera_->getIntrinsic();
+  cv::Mat rvec, tvec, inliers;
+  cv::solvePnPRansac( pts3d, pts2d, K, cv::Mat(), rvec, tvec, false, 100, 4.0, 0.99, inliers );
 
-  num_inliers_ = inliers.rows
+  num_inliers_ = inliers.rows;
   std::cout << "PnP inliers: " << num_inliers_ << std::endl;
   T_c_r_estimated = Sophus::SE3(
-    SO3(rvec.at<double>(0,0), rvec.at<double>(1,0), rvec.at<double>(2,0)), 
+    Sophus::SO3(rvec.at<double>(0,0), rvec.at<double>(1,0), rvec.at<double>(2,0)), 
     Eigen::Vector3d( tvec.at<double>(0,0), tvec.at<double>(1,0), tvec.at<double>(2,0))
   );
 }
@@ -126,7 +126,7 @@ void VisualOdometry::setPointCloud(){
   des_ref_ = cv::Mat();
   cv::Mat K = ref_frame_->camera_->getIntrinsic();
   for (int i = 0; i < kpts_.size(); i++){
-    double d = ref_frame_->findDepth(kpts_[i].pt);
+    double d = ref_frame_->findDepth(kpts_[i]);
     if (d > 0)
     {
       Eigen::Vector3d p = ref_frame_->camera_->pixel2camera(
@@ -159,7 +159,7 @@ bool VisualOdometry::checkEstimatedPose(){
 }
 
 bool VisualOdometry::checkKeyFrame(){
-  Sophus::Vector6d d = T_c_r_estimated_.log();
+  Sophus::Vector6d d = T_c_r_estimated.log();
   Eigen::Vector3d trans = d.head<3>();
   Eigen::Vector3d rot = d.tail<3>();
   if ( rot.norm() >key_frame_min_rot || trans.norm() >key_frame_min_trans )

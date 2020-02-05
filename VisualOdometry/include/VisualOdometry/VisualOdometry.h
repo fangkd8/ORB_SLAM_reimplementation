@@ -1,12 +1,12 @@
 #ifndef VISUALODOMETRY_H
 #define VISUALODOMETRY_H
 
-#include "VisualOdometry/common_include.h";
-#include "VisualOdometry/camera.h";
-#include "VisualOdometry/config.h";
-#include "VisualOdometry/frame.h";
-#include "VisualOdometry/map.h";
-#include "VisualOdometry/mappoint.h";
+#include "VisualOdometry/common_include.h"
+#include "VisualOdometry/camera.h"
+#include "VisualOdometry/config.h"
+#include "VisualOdometry/frame.h"
+#include "VisualOdometry/map.h"
+#include "VisualOdometry/mappoint.h"
 
 namespace VisualOdometry
 {
@@ -14,11 +14,11 @@ namespace VisualOdometry
 class VisualOdometry
 {
 public:
-  std::shared_ptr<VisualOdometry> Ptr;
+  typedef std::shared_ptr<VisualOdometry> Ptr;
   enum State{
-    INITIALIZING = -1;
-    OK = 0;
-    LOST;
+    INITIALIZING = -1,
+    OK = 0,
+    LOST
   };
 
   // current VO state.

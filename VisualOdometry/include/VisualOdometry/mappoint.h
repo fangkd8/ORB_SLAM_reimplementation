@@ -1,7 +1,7 @@
 #ifndef MAPPOINT_H
 #define MAPPOINT_H
 
-#include "VisualOdometry/common_include.h";
+#include "VisualOdometry/common_include.h"
 namespace VisualOdometry
 {
 
@@ -28,7 +28,7 @@ public:
 
   // still not clear of this function, same as frame.h
   static MapPoint::Ptr createMapPoint();
-}
+};
 
 }
 #endif
