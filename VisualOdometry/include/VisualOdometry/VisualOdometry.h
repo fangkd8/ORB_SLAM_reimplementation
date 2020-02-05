@@ -14,6 +14,7 @@ namespace VisualOdometry
 class VisualOdometry
 {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef std::shared_ptr<VisualOdometry> Ptr;
   enum State{
     INITIALIZING = -1,
@@ -59,7 +60,7 @@ public:
 public:
   VisualOdometry();
 
-  ~VisualOdometry();
+  ~VisualOdometry() = default;
 
   bool addFrame(Frame::Ptr new_frame);
 

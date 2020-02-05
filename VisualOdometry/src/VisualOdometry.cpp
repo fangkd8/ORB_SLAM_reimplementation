@@ -19,7 +19,7 @@ VisualOdometry::VisualOdometry() :
   ORB_detector = cv::ORB::create ( num_of_features_, scale_factor_, level_pyramid_ );
 }
 
-VisualOdometry::~VisualOdometry(){}
+// VisualOdometry::~VisualOdometry(){}
 
 bool VisualOdometry::addFrame(Frame::Ptr new_frame){
   switch(state_){
@@ -27,6 +27,7 @@ bool VisualOdometry::addFrame(Frame::Ptr new_frame){
     case INITIALIZING:{
       state_ = OK;
       cur_frame_ = ref_frame_ = new_frame;
+      // std::cout << Sophus::SE3().inverse() << std::endl;
       map_->insertKeyFrame(new_frame);
       // detect keypoints, compute descriptors for 1st frame.
       extractKeypoints();
@@ -37,6 +38,7 @@ bool VisualOdometry::addFrame(Frame::Ptr new_frame){
 
     case OK:{
       cur_frame_ = new_frame;
+      cur_frame_->T_c_w_ = ref_frame_->T_c_w_;
       // detect keypoints, compute descriptors, find matches.
       extractKeypoints();
       computeDescriptor();
@@ -72,6 +74,7 @@ bool VisualOdometry::addFrame(Frame::Ptr new_frame){
 void VisualOdometry::extractKeypoints(){
   kpts_.clear();
   ORB_detector->detect(cur_frame_->color_, kpts_);
+  // std::cout << "keypoints: " << kpts_.size() << std::endl;
 }
 
 void VisualOdometry::computeDescriptor(){
@@ -97,14 +100,15 @@ void VisualOdometry::findFeatureMatches(){
     if (raw_match[i].distance < std::max(30.0, 2*min_dist))
       matches.push_back(raw_match[i]);
   }
+  std::cout << "match size: " << matches.size() << std::endl;
 }
 
 void VisualOdometry::poseEstimationPnP(){
   std::vector<cv::Point3f> pts3d;
   std::vector<cv::Point2f> pts2d;
   for (auto m : matches){
-    pts3d.push_back(ref_points_3d_[m.trainIdx]);
-    pts2d.push_back(kpts_[m.queryIdx].pt);
+    pts3d.push_back(ref_points_3d_[m.queryIdx]);
+    pts2d.push_back(kpts_[m.trainIdx].pt);
   }
   cv::Mat K = ref_frame_->camera_->getIntrinsic();
   cv::Mat rvec, tvec, inliers;
@@ -112,10 +116,17 @@ void VisualOdometry::poseEstimationPnP(){
 
   num_inliers_ = inliers.rows;
   std::cout << "PnP inliers: " << num_inliers_ << std::endl;
-  T_c_r_estimated = Sophus::SE3(
-    Sophus::SO3(rvec.at<double>(0,0), rvec.at<double>(1,0), rvec.at<double>(2,0)), 
-    Eigen::Vector3d( tvec.at<double>(0,0), tvec.at<double>(1,0), tvec.at<double>(2,0))
-  );
+  // T_c_r_estimated = Sophus::SE3(
+  //   Sophus::SO3(rvec.at<double>(0,0), rvec.at<double>(1,0), rvec.at<double>(2,0)), 
+  //   Eigen::Vector3d( tvec.at<double>(0,0), tvec.at<double>(1,0), tvec.at<double>(2,0))
+  // );
+  Eigen::Quaterniond q =
+        Eigen::AngleAxisd(rvec.at<double>(0, 0), Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(rvec.at<double>(1, 0), Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(rvec.at<double>(2, 0), Eigen::Vector3d::UnitZ());
+  T_c_r_estimated = Sophus::SE3(q, Eigen::Vector3d(tvec.at<double>(0, 0), tvec.at<double>(1, 0),
+                                tvec.at<double>(2, 0)));
+  // std::cout << T_c_r_estimated * Sophus::SE3().inverse() << std::endl << std::endl;
 }
 
 void VisualOdometry::setPointCloud(){
@@ -125,8 +136,11 @@ void VisualOdometry::setPointCloud(){
   ref_points_3d_.clear();
   des_ref_ = cv::Mat();
   cv::Mat K = ref_frame_->camera_->getIntrinsic();
+  // std::cout << "K: " << std::endl << K << std::endl;
+  // std::cout << "depth scale: " << ref_frame_->camera_->depth_scale_ << std::endl;
   for (int i = 0; i < kpts_.size(); i++){
     double d = ref_frame_->findDepth(kpts_[i]);
+    // std::cout << d << std::endl;
     if (d > 0)
     {
       Eigen::Vector3d p = ref_frame_->camera_->pixel2camera(

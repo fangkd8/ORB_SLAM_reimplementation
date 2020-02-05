@@ -77,10 +77,13 @@ int main ( int argc, char** argv )
         vo->addFrame ( pFrame );
         cout<<"VO costs time: "<<timer.elapsed()<<endl;
         
-        if ( vo->state_ == VisualOdometry::VisualOdometry::LOST )
+        if ( vo->state_ == VisualOdometry::VisualOdometry::LOST ){
+            cout << "track lost" << endl;
             break;
+        }
+        // cout << i << endl << pFrame->T_c_w_ << pFrame->T_c_w_.inverse() << endl;
         Sophus::SE3 Tcw = pFrame->T_c_w_.inverse();
-        
+        // cout << i << endl;
         // show the map and the camera pose 
         cv::Affine3d M(
             cv::Affine3d::Mat3( 
@@ -92,12 +95,17 @@ int main ( int argc, char** argv )
                 Tcw.translation()(0,0), Tcw.translation()(1,0), Tcw.translation()(2,0)
             )
         );
-        
+        // cout << "M" << endl;
         cv::imshow("image", color );
         cv::waitKey(1);
         vis.setWidgetPose( "Camera", M);
         vis.spinOnce(1, false);
     }
+    cout << "out of loop" << endl;
+    // Warning: If get rid of waitkey(0), will cause memory leak.
+    cv::waitKey(0);
 
-    return 0;
+    // cv::destroyAllWindows();
+    cout << "exit" << endl;
+    return EXIT_SUCCESS;
 }

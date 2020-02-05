@@ -9,6 +9,7 @@ namespace VisualOdometry
 class Frame
 {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef std::shared_ptr<Frame> Ptr;
   unsigned long id_; // Frame id.
   double timestamp_; // timestamp
@@ -22,7 +23,7 @@ public:
   Frame(long id, double timestamp=0, Sophus::SE3 T_c_w=Sophus::SE3(), 
         Camera::Ptr cam=nullptr, cv::Mat color = cv::Mat(), cv::Mat depth = cv::Mat());
 
-  ~Frame();
+  ~Frame() = default;
 
   static Frame::Ptr createFrame();
 

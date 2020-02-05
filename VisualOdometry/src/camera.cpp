@@ -3,6 +3,14 @@
 namespace VisualOdometry
 {
 
+Camera::Camera(){
+  fx_ = Config::get<float>("camera.fx");
+  fy_ = Config::get<float>("camera.fy");
+  cx_ = Config::get<float>("camera.cx");
+  cy_ = Config::get<float>("camera.cy");
+  depth_scale_ = Config::get<float>("camera.depth_scale");
+}
+
 Eigen::Vector3d Camera::world2camera(const Eigen::Vector3d p_w, 
                                      Sophus::SE3 T_c_w){
   return T_c_w * p_w;
