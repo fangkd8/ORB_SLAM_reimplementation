@@ -127,6 +127,7 @@ void VisualOdometry::poseEstimationPnP(){
   T_c_r_estimated = Sophus::SE3(q, Eigen::Vector3d(tvec.at<double>(0, 0), tvec.at<double>(1, 0),
                                 tvec.at<double>(2, 0)));
   // std::cout << T_c_r_estimated * Sophus::SE3().inverse() << std::endl << std::endl;
+  BundleAdjustmentPoseOnly(pts3d, pts2d, inliers);
 }
 
 void VisualOdometry::setPointCloud(){
@@ -179,6 +180,46 @@ bool VisualOdometry::checkKeyFrame(){
   if ( rot.norm() >key_frame_min_rot || trans.norm() >key_frame_min_trans )
       return true;
   return false;
+}
+
+void VisualOdometry::BundleAdjustmentPoseOnly(std::vector<cv::Point3f> pts3d, 
+                                              std::vector<cv::Point2f> pts2d,
+                                              cv::Mat inliers){
+  // for block solver, <6, 2>, 6 is se3exp dim, 2 is error dim.
+  typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 2> > Block;
+  Block::LinearSolverType* linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>();
+  Block* solver_ptr = new Block(  std::unique_ptr<Block::LinearSolverType>(linearSolver) );
+  g2o::OptimizationAlgorithmLevenberg* solver = 
+    new g2o::OptimizationAlgorithmLevenberg( 
+             std::unique_ptr<Block>(solver_ptr) );
+  g2o::SparseOptimizer optimizer;
+  optimizer.setAlgorithm(solver);
+  optimizer.setVerbose(false);
+
+
+  g2o::VertexSE3Expmap *camera_pose = new g2o::VertexSE3Expmap();
+  Eigen::Quaterniond q = T_c_r_estimated.unit_quaternion();
+  Eigen::Vector3d t = T_c_r_estimated.translation();
+  camera_pose->setEstimate(g2o::SE3Quat(q, t));
+  camera_pose->setId(0);
+  optimizer.addVertex(camera_pose);
+
+  // edges.
+  for (int i = 0; i < inliers.rows; i++){
+    int idx = inliers.at<int>(i,0);
+    EdgeProjectXYZ2UVPose* edge = new EdgeProjectXYZ2UVPose(cur_frame_->camera_, pts3d[idx]);
+    edge->setId(i);
+    edge->setVertex(0, dynamic_cast<g2o::VertexSE3Expmap*>(camera_pose));
+    edge->setMeasurement(Eigen::Vector2d(pts2d[idx].x, pts2d[idx].y));
+    edge->setInformation(Eigen::Matrix2d::Identity());
+    optimizer.addEdge(edge);
+  }
+
+  optimizer.initializeOptimization();
+  optimizer.optimize(100);
+
+  T_c_r_estimated = Sophus::SE3(camera_pose->estimate().rotation(), 
+                                camera_pose->estimate().translation());
 }
 
 }

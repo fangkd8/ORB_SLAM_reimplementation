@@ -5,6 +5,7 @@ add_library( VisualOdometry SHARED
     camera.cpp
     config.cpp
     VisualOdometry.cpp
+    g2o_type.cpp
 )
 
 target_link_libraries( VisualOdometry

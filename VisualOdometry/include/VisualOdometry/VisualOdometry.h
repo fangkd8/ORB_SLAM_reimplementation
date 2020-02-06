@@ -7,6 +7,7 @@
 #include "VisualOdometry/frame.h"
 #include "VisualOdometry/map.h"
 #include "VisualOdometry/mappoint.h"
+#include "VisualOdometry/g2o_type.h"
 
 namespace VisualOdometry
 {
@@ -80,6 +81,10 @@ private:
   bool checkEstimatedPose();
 
   bool checkKeyFrame();
+
+  void BundleAdjustmentPoseOnly(std::vector<cv::Point3f> pts3d, 
+                                std::vector<cv::Point2f> pts2d,
+                                cv::Mat inliers);
 };
 
 }
