@@ -33,3 +33,6 @@ qx: 0.6132
 qy: 0.5962
 qz: -0.3311
 qw: -0.3986
+
+#if enable optimization
+optimize: 1

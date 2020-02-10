@@ -81,7 +81,10 @@ int main ( int argc, char** argv )
     pFrame->timestamp_ = rgb_times[i];
 
     boost::timer timer;
-    vo->addFrame ( pFrame );
+    bool tf = vo->addFrame ( pFrame );
+    if (!tf){
+      continue;
+    }
     cout<<"VO costs time: "<<timer.elapsed()<<endl;
     
     if ( vo->state_ == VisualOdometry::VisualOdometry::LOST ){

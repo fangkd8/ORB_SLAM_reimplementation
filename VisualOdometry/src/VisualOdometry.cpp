@@ -16,6 +16,7 @@ VisualOdometry::VisualOdometry() :
   min_inliers_        = Config::get<int> ( "min_inliers" );
   key_frame_min_rot   = Config::get<double> ( "keyframe_rotation" );
   key_frame_min_trans = Config::get<double> ( "keyframe_translation" );
+  enable_opt          = Config::get<double> ("optimize");
   ORB_detector = cv::ORB::create ( num_of_features_, scale_factor_, level_pyramid_ );
 }
 
@@ -127,7 +128,9 @@ void VisualOdometry::poseEstimationPnP(){
   T_c_r_estimated = Sophus::SE3(q, Eigen::Vector3d(tvec.at<double>(0, 0), tvec.at<double>(1, 0),
                                 tvec.at<double>(2, 0)));
   // std::cout << T_c_r_estimated * Sophus::SE3().inverse() << std::endl << std::endl;
-  BundleAdjustmentPoseOnly(pts3d, pts2d, inliers);
+  if (enable_opt == 1){
+    BundleAdjustmentPoseOnly(pts3d, pts2d, inliers);
+  }
 }
 
 void VisualOdometry::setPointCloud(){

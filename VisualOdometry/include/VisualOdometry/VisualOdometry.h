@@ -58,6 +58,8 @@ public:
   double key_frame_min_rot; // minimal rotation of two key-frames
   double key_frame_min_trans; // minimal translation of two key-frames
 
+  double enable_opt;
+
 public:
   VisualOdometry();
 
